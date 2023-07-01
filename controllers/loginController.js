@@ -5,15 +5,15 @@ const { sign } = require("jsonwebtoken");
 const { corsOptions } = require("../configs/corsOptions");
 
 async function handleLogin(req, res) {
-  const url = process.env.IS_TESTING_ENV
-    ? "https://discord.com/api/oauth2/authorize?client_id=1122867395720134716&redirect_uri=http%3A%2F%2Flocalhost%3A3500%2Flogin%2Fdiscord%2Fcallback&response_type=code&scope=identify"
-    : "https://discord.com/api/oauth2/authorize?client_id=1122867395720134716&redirect_uri=http%3A%2F%2localhost:3500%2Fauth%2Fcallback&response_type=code&scope=identify";
-  // apply cors to res
-  const origin = req.headers.origin;
-  console.log("Req from origin", origin);
-  res.setHeader("Access-Control-Allow-Origin", origin);
-  // redirect
-  res.redirect(url);
+  const redirectURL = process.env.IS_TESTING_ENV
+    ? "http://localhost:3500/login/discord/callback"
+    : "http://localhost:3500/auth/callback";
+
+  // Apply CORS to the initial response
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
+  // Perform the redirect
+  res.redirect(302, redirectURL);
 }
 async function handleCallback(req, res) {
   const code = req.query.code;
