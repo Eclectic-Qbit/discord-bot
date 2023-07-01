@@ -8,11 +8,11 @@ async function handleLogin(req, res) {
   const url = process.env.IS_TESTING_ENV
     ? "https://discord.com/api/oauth2/authorize?client_id=1122867395720134716&redirect_uri=http%3A%2F%2Flocalhost%3A3500%2Flogin%2Fdiscord%2Fcallback&response_type=code&scope=identify"
     : "https://discord.com/api/oauth2/authorize?client_id=1122867395720134716&redirect_uri=http%3A%2F%2localhost:3500%2Fauth%2Fcallback&response_type=code&scope=identify";
-  // Apply cors to res
-  corsOptions.origin.map((el) => {
-    console.log("Setting header to", el);
-    res.setHeader("Access-Control-Allow-Origin", el);
-  });
+  // apply cors to res
+  const origin = req.headers.origin;
+  console.log("Req from origin", origin);
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  // redirect
   res.redirect(url);
 }
 async function handleCallback(req, res) {
