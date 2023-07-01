@@ -10,16 +10,20 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ credentials: true }));
-app.use(verifyToken);
+
 // db connection
 connectDb();
 // routes
+// => unprotected
 app.use("/ping", (req, res) => {
   console.log("Some1 pinged!");
   res.status(200).json({ message: "Pong!" });
 });
-// app.use("/users", require("./routes/api/users"));
 app.use("/login", require("./routes/login"));
+app.use(verifyToken);
+// app.use("/users", require("./routes/api/users"));
+// => protected
+// ...
 // start express
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
