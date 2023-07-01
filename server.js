@@ -14,7 +14,10 @@ app.use(verifyToken);
 // db connection
 connectDb();
 // routes
-app.use("/ping", (req, res) => res.status(200).json({ message: "Pong!" }));
+app.use("/ping", (req, res) => {
+  console.log("Some1 pinged!");
+  res.status(200).json({ message: "Pong!" });
+});
 // app.use("/users", require("./routes/api/users"));
 app.use("/login", require("./routes/login"));
 // start express
