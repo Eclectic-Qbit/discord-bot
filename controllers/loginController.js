@@ -7,13 +7,8 @@ const { corsOptions } = require("../configs/corsOptions");
 async function handleLogin(req, res) {
   const redirectURL = process.env.IS_TESTING_ENV
     ? "http://localhost:3500/login/discord/callback"
-    : "http://localhost:3500/auth/callback";
-
-  // Apply CORS to the initial response
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-
-  // Perform the redirect
-  res.redirect(302, redirectURL);
+    : "http://www.eclecticqbit.art/login/discord/callback";
+  res.redirect(redirectURL);
 }
 async function handleCallback(req, res) {
   const code = req.query.code;

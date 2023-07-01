@@ -29,5 +29,4 @@ app.use(verifyToken);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log("Server started & listening on port ", PORT);
-  console.log("Using cors options", corsOptions);
 });
