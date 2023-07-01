@@ -2,11 +2,17 @@ const axios = require("axios");
 const User = require("../models/User");
 const UserLog = require("../models/UserLog");
 const { sign } = require("jsonwebtoken");
+const { corsOptions } = require("../configs/corsOptions");
 
 async function handleLogin(req, res) {
   const url = process.env.IS_TESTING_ENV
     ? "https://discord.com/api/oauth2/authorize?client_id=1122867395720134716&redirect_uri=http%3A%2F%2Flocalhost%3A3500%2Flogin%2Fdiscord%2Fcallback&response_type=code&scope=identify"
     : "https://discord.com/api/oauth2/authorize?client_id=1122867395720134716&redirect_uri=http%3A%2F%2localhost:3500%2Fauth%2Fcallback&response_type=code&scope=identify";
+  // Apply cors to res
+  corsOptions.origin.map((el) => {
+    console.log("Setting header to", el);
+    res.setHeader("Access-Control-Allow-Origin", el);
+  });
   res.redirect(url);
 }
 async function handleCallback(req, res) {
