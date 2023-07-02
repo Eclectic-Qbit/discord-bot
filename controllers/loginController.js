@@ -63,11 +63,12 @@ async function handleCallback(req, res) {
   });
   setDefaultCookie(res, "token", token);
   // answer
-  res.redirect(
+  /*res.redirect(
     process.env.IS_TESTING_ENV === "true"
       ? process.env.CLIENT_REDIRECT_TESTING_URL
       : process.env.CLIENT_REDIRECT_PROD_URL
-  );
+  );*/
+  res.status(200).json({});
   console.log(`Content response in ${Date.now() - start}ms`);
 }
 
