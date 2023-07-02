@@ -70,7 +70,7 @@ async function handleCallback(req, res) {
         };
   res.cookie("token", token, cookiesOptioms);
   console.log("Should've setted", "token", token, cookiesOptioms);
-  console.log(res.cookies.token, "vs", req.cookies.token);
+  console.log(res.getHeaders(), "vs", req.cookies.token);
   // answer
   res.redirect(
     process.env.IS_TESTING_ENV === "true"
