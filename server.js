@@ -15,12 +15,13 @@ app.use(cors(corsOptions));
 // db connection
 connectDb();
 // routes
+const pre = process.env.IS_TESTING_ENV === "true" ? "" : "/api";
 // => unprotected
-app.use("/ping", (req, res) => {
+app.use(`${pre}/ping`, (req, res) => {
   console.log("Some1 pinged!");
   res.status(200).json({ message: "Pong!" });
 });
-app.use("/login", require("./routes/login"));
+app.use(`${pre}/login`, require("./routes/login"));
 app.use(verifyToken);
 // app.use("/users", require("./routes/api/users"));
 // => protected
