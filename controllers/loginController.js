@@ -60,7 +60,6 @@ async function handleCallback(req, res) {
     username: userResponse.username,
     avatar: userResponse.avatar,
   });
-  console.log("Found token", token);
   res.clearCookie("token");
   const cookiesOptioms =
     process.env.IS_TESTING_ENV === "true"
@@ -70,6 +69,8 @@ async function handleCallback(req, res) {
           secure: true,
         };
   res.cookie("token", token, cookiesOptioms);
+  console.log("Should've setted", "token", token, cookiesOptioms);
+  console.log(res.cookies.token, "vs", req.cookies.token);
   // answer
   res.redirect(
     process.env.IS_TESTING_ENV === "true"
