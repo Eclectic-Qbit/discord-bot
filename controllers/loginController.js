@@ -62,11 +62,14 @@ async function handleCallback(req, res) {
   });
   console.log("Found token", token);
   res.clearCookie("token");
-  res.cookie("token", token, {
-    httpOnly: false,
-    sameSite: false,
-    expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
-  });
+  const cookiesOptioms =
+    process.env.IS_TESTING_ENV === "true"
+      ? {}
+      : {
+          sameSite: false,
+          secure: true,
+        };
+  res.cookie("token", token, cookiesOptioms);
   // answer
   res.redirect(
     process.env.IS_TESTING_ENV === "true"
