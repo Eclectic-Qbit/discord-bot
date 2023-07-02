@@ -4,6 +4,7 @@ async function getDiscordData(code) {
   const redirect = process.env.IS_TESTING_ENV
     ? process.env.REDIRECT_URL_TESTING
     : process.env.REDIRECT_URL_PROD;
+  console.log(process.env.IS_TESTING_ENV, "=>", redirect);
   const params = new URLSearchParams({
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
