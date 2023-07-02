@@ -1,5 +1,5 @@
 function setDefaultCookie(res, name, val) {
-  const sameSite = process.env.IS_TESTING_ENV === "true" ? "none" : "strict";
+  const sameSite = process.env.IS_TESTING_ENV === "true" ? "strict" : "strict";
   const domain =
     process.env.IS_TESTING_ENV === "true" ? ".localhost" : ".eclecticqbit.art";
   const maxAge = 2 * 1000 * 60 * 60;
