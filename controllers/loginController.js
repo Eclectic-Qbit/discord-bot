@@ -63,7 +63,7 @@ async function handleCallback(req, res) {
   res.cookie("token", token);
   // answer
   res.redirect(
-    process.env.IS_TESTING_ENV
+    process.env.IS_TESTING_ENV === "true"
       ? process.env.CLIENT_REDIRECT_TESTING_URL
       : process.env.CLIENT_REDIRECT_PROD_URL
   );
