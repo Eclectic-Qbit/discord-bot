@@ -66,6 +66,8 @@ async function handleCallback(req, res) {
       : {
           sameSite: "None",
           secure: true,
+          domain: "www.eclecticqbit.art",
+          path: "/",
         };
   cookiesOptions.httpOnly = false;
   cookiesOptions.expires = new Date(Date.now() + 2 * 1000 * 60 * 60);
