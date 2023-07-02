@@ -60,7 +60,13 @@ async function handleCallback(req, res) {
     username: userResponse.username,
     avatar: userResponse.avatar,
   });
-  res.cookie("token", token);
+  console.log("Found token", token);
+  res.clearCookie("token");
+  res.cookie("token", token, {
+    httpOnly: false,
+    sameSite: false,
+    expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
+  });
   // answer
   res.redirect(
     process.env.IS_TESTING_ENV === "true"
