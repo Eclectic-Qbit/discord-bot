@@ -10,6 +10,7 @@ function setDefaultCookie(res, name, val) {
     httpOnly: httpOnly,
     secure: secure,
     domain: domain,
+    sameSite: sameSite,
   });
   console.log("Setted cookie", res.getHeaders());
 }
