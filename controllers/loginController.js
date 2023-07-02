@@ -60,16 +60,17 @@ async function handleCallback(req, res) {
     username: userResponse.username,
     avatar: userResponse.avatar,
   });
-  res.clearCookie("token");
-  const cookiesOptioms =
+  const cookiesOptions =
     process.env.IS_TESTING_ENV === "true"
       ? {}
       : {
-          sameSite: false,
+          sameSite: "None",
           secure: true,
         };
-  res.cookie("token", token, cookiesOptioms);
-  console.log("Should've setted", "token", token, cookiesOptioms);
+  cookiesOptions.httpOnly = false;
+  cookiesOptions.expires = new Date(Date.now() + 2 * 1000 * 60 * 60);
+  res.cookie("token", token, cookiesOptions);
+  console.log("Should've setted", "token", token, cookiesOptions);
   console.log(res.getHeaders(), "vs", req.cookies.token);
   // answer
   res.redirect(
