@@ -3,13 +3,9 @@ const User = require("../models/User");
 const UserLog = require("../models/UserLog");
 const { sign } = require("jsonwebtoken");
 const { corsOptions } = require("../configs/corsOptions");
+const { getDiscordData } = require("../commonFunctions/commonDiscord");
+const { signToken } = require("../commonFunctions/commonToken");
 
-async function handleLogin(req, res) {
-  const redirectURL = process.env.IS_TESTING_ENV
-    ? "http://localhost:3500/login/discord/callback"
-    : "http://www.eclecticqbit.art/login/discord/callback";
-  res.redirect(redirectURL);
-}
 async function handleCallback(req, res) {
   const code = req.query.code;
   if (!code) {
@@ -17,93 +13,61 @@ async function handleCallback(req, res) {
     return;
   }
   const start = Date.now();
-  const params = new URLSearchParams({
-    client_id: process.env.CLIENT_ID,
-    client_secret: process.env.CLIENT_SECRET,
-    grant_type: "authorization_code",
-    code: code,
-    redirect_uri: process.env.IS_TESTING_ENV
-      ? process.env.REDIRECT_URL_TESTING
-      : process.env.REDIRECT_URL_PROD,
-  });
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-  };
-  try {
-    const response = await axios.post(
-      "https://discord.com/api/oauth2/token",
-      params,
-      {
-        headers,
-      }
-    );
-    const userResponse = await axios.get("https://discord.com/api/users/@me", {
-      headers: {
-        Authorization: `Bearer ${response.data.access_token}`,
-        ...headers,
-      },
-    });
-    console.log("RESPONSE", userResponse.data);
-    // update user with latest infos
-    const parsedUser = {
-      username: userResponse.data.username,
-      globalName: userResponse.data.global_name,
-      avatar: userResponse.data.avatar,
-      discriminator: userResponse.data.discriminator,
-      publicFlags: userResponse.data.public_flags,
-      flags: userResponse.data.flags,
-      banner: userResponse.data.banner,
-      bannerColor: userResponse.data.banner_color,
-      accentColor: userResponse.data.accent_color,
-      locale: userResponse.data.locale,
-      premiumType: userResponse.data.premium_type,
-      avatarDecoration: userResponse.data.avatar_decoration,
-      refreshToken: response.data.refresh_token,
-    };
-    const find = await User.findOneAndUpdate(
-      { discordId: userResponse.data.id },
-      parsedUser
-    );
-    console.log("USER", find);
-    let dbId = find._id;
-    let username = find.username;
-    if (!find || find.length === 0) {
-      const user = new User({
-        discordId: userResponse.data.id,
-        ...parsedUser,
-        role: 0,
-      });
-      const saveUser = await user.save();
-      dbId = saveUser._id;
-      username = saveUser.username;
-    }
-    // save that the user logged
-    const userLog = new UserLog({
-      discordId: userResponse.data.id,
-      date: Date.now(),
-    });
-    await userLog.save();
-    console.log("Signing for", dbId);
-    // save jwt
-    const token = sign(
-      { id: dbId, username: username },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "2h",
-      }
-    );
-    res.cookie("token", token);
-    // answer
-    res.redirect(process.env.CLIENT_REDIRECT_URL);
-  } catch (e) {
-    console.log("Error!");
-    console.error(e);
-    console.error(params);
+
+  const userResponse = await getDiscordData(code);
+  if (!userResponse) {
     res.status(500).json({ message: "Server Error!" });
     return;
-  } finally {
-    console.log(`Content response in ${Date.now() - start}ms`);
   }
+  console.log(userResponse);
+  // update user with latest infos
+  const parsedUser = {
+    username: userResponse.username,
+    globalName: userResponse.global_name,
+    avatar: userResponse.avatar,
+    discriminator: userResponse.discriminator,
+    publicFlags: userResponse.public_flags,
+    flags: userResponse.flags,
+    banner: userResponse.banner,
+    bannerColor: userResponse.banner_color,
+    accentColor: userResponse.accent_color,
+    locale: userResponse.locale,
+    premiumType: userResponse.premium_type,
+    avatarDecoration: userResponse.avatar_decoration,
+    refreshToken: userResponse.refresh_token,
+  };
+  const find = await User.findOneAndUpdate(
+    { discordId: userResponse.id },
+    parsedUser
+  );
+  if (!find || find.length === 0) {
+    const user = new User({
+      discordId: userResponse.id,
+      ...parsedUser,
+      role: 0,
+    });
+    await user.save();
+  }
+  // save that the user logged
+  const userLog = new UserLog({
+    discordId: userResponse.id,
+    date: Date.now(),
+  });
+  await userLog.save();
+  // save jwt
+  const token = signToken({
+    id: userResponse.id,
+    username: userResponse.username,
+    avatar: userResponse.avatar,
+  });
+  res.cookie("token", token);
+  // answer
+  res.redirect(
+    process.env.IS_TESTING_ENV
+      ? process.env.CLIENT_REDIRECT_TESTING_URL
+      : process.env.CLIENT_REDIRECT_PROD_URL
+  );
+  console.log(`Content response in ${Date.now() - start}ms`);
 }
 
-module.exports = { handleLogin, handleCallback };
+module.exports = { handleCallback };
