@@ -35,9 +35,8 @@ async function handleCallback(req, res) {
     locale: userResponse.locale,
     premiumType: userResponse.premium_type,
     avatarDecoration: userResponse.avatar_decoration,
-    refreshToken: userResponse.refresh_token,
+    refreshToken: userResponse.refreshToken,
   };
-  console.log("Parsed User", parsedUser);
   const find = await User.findOneAndUpdate(
     { discordId: userResponse.id },
     parsedUser
