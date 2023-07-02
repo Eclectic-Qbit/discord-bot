@@ -20,9 +20,9 @@ async function handleCallback(req, res) {
     res.status(500).json({ message: "Server Error!" });
     return;
   }
-  console.log(userResponse);
   // update user with latest infos
   const parsedUser = {
+    discordId: userResponse.id,
     username: userResponse.username,
     globalName: userResponse.global_name,
     avatar: userResponse.avatar,
@@ -37,13 +37,13 @@ async function handleCallback(req, res) {
     avatarDecoration: userResponse.avatar_decoration,
     refreshToken: userResponse.refresh_token,
   };
+  console.log("Parsed User", parsedUser);
   const find = await User.findOneAndUpdate(
     { discordId: userResponse.id },
     parsedUser
   );
   if (!find || find.length === 0) {
     const user = new User({
-      discordId: userResponse.id,
       ...parsedUser,
       role: 0,
     });

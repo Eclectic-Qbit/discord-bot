@@ -57,11 +57,11 @@ const userSchema = new Schema({
   role: {
     type: Number,
     default: 0,
-    required: true,
+    required: false,
   },
   refreshToken: {
     type: String,
-    required: true,
+    required: false,
   },
   address: {
     type: String,
