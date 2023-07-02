@@ -66,7 +66,7 @@ async function handleCallback(req, res) {
       : {
           sameSite: "None",
           secure: true,
-          domain: "www.eclecticqbit.art",
+          domain: ".eclecticqbit.art",
           path: "/",
         };
   cookiesOptions.httpOnly = false;
