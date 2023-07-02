@@ -4,6 +4,7 @@ const { setDefaultCookie } = require("../commonFunctions/commonCookie");
 
 async function verifyToken(req, res, next) {
   try {
+    console.log(req);
     const { id, username, avatar, exp } = getDataFromToken(req.cookies.token);
     if (Date.now() >= exp * 1000) {
       res.clearCookie("token");
