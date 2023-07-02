@@ -1,5 +1,6 @@
 const { getDataFromToken } = require("../commonFunctions/commonUser");
 const { signToken } = require("../commonFunctions/commonToken");
+const { setDefaultCookie } = require("../commonFunctions/commonCookie");
 
 async function verifyToken(req, res, next) {
   try {
@@ -15,7 +16,7 @@ async function verifyToken(req, res, next) {
         username: username,
         avatar: avatar,
       });
-      res.cookie("token", newToken);
+      setDefaultCookie(res, "token", newToken);
       console.log("Refreshed Token For", username);
     }
   } catch (e) {

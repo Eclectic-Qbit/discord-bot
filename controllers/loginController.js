@@ -5,6 +5,7 @@ const { sign } = require("jsonwebtoken");
 const { corsOptions } = require("../configs/corsOptions");
 const { getDiscordData } = require("../commonFunctions/commonDiscord");
 const { signToken } = require("../commonFunctions/commonToken");
+const { setDefaultCookie } = require("../commonFunctions/commonCookie");
 
 async function handleCallback(req, res) {
   const code = req.query.code;
@@ -60,20 +61,7 @@ async function handleCallback(req, res) {
     username: userResponse.username,
     avatar: userResponse.avatar,
   });
-  const cookiesOptions =
-    process.env.IS_TESTING_ENV === "true"
-      ? {}
-      : {
-          sameSite: "None",
-          secure: true,
-          domain: ".eclecticqbit.art",
-          path: "/",
-        };
-  cookiesOptions.httpOnly = false;
-  cookiesOptions.expires = new Date(Date.now() + 2 * 1000 * 60 * 60);
-  res.cookie("token", token, cookiesOptions);
-  console.log("Should've setted", "token", token, cookiesOptions);
-  console.log(res.getHeaders(), "vs", req.cookies.token);
+  setDefaultCookie(res, "token", token);
   // answer
   res.redirect(
     process.env.IS_TESTING_ENV === "true"
