@@ -12,6 +12,6 @@ function setDefaultCookie(res, name, val) {
     domain: domain,
     sameSite: sameSite,
   });
-  console.log("Setted cookie", res.getHeaders());
+  console.log("Setted cookie");
 }
 module.exports = { setDefaultCookie };

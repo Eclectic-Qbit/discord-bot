@@ -23,7 +23,7 @@ app.use(`${pre}/ping`, (req, res) => {
 });
 app.use(`${pre}/login`, require("./routes/login"));
 app.use(verifyToken);
-// app.use("/users", require("./routes/api/users"));
+app.use(`${pre}/users`, require("./routes/api/users"));
 // => protected
 // ...
 // start express

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
+  // Discord info
   discordId: {
     type: String,
     required: true,
@@ -59,12 +60,42 @@ const userSchema = new Schema({
     default: 0,
     required: false,
   },
+
+  // Website info
   refreshToken: {
     type: String,
     required: false,
   },
-  address: {
+  walletAddress: {
     type: String,
+    required: false,
+  },
+  pfp: {
+    id: {
+      type: String,
+      required: false,
+    },
+    type: {
+      type: String,
+      required: false,
+    },
+    date: {
+      type: Number,
+      required: false,
+    },
+  },
+  customUsername: {
+    type: String,
+    required: false,
+  },
+  city: {
+    type: String,
+    required: false,
+  },
+  // Points
+  gamePoints: {
+    type: Number,
+    default: 0,
     required: false,
   },
 });
