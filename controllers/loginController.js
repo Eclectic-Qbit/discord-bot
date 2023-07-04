@@ -55,11 +55,17 @@ async function handleCallback(req, res) {
   });
   await userLog.save();
   // save jwt
-  const token = signToken({
+  console.log(find.pfp);
+  const tokenObj = {
     id: userResponse.id,
     username: userResponse.username,
-    avatar: userResponse.avatar,
-  });
+    avatar: {
+      type: find.pfp && find.pfp.value > -2 ? "native" : "discord",
+      value:
+        find.pfp && find.pfp.value > -2 ? find.pfp.value : userResponse.avatar,
+    },
+  };
+  const token = signToken(tokenObj);
   setDefaultCookie(res, "token", token);
   // answer
   res.redirect(
