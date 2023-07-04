@@ -64,6 +64,7 @@ async function updateUser(req, res) {
     };
     parsedObj.city.value = body.city;
   }
+  console.log(parsedObj);
   const user = await User.findOneAndUpdate({ discordId: id }, parsedObj)
     .catch((e) => {
       console.error(e);
@@ -73,7 +74,6 @@ async function updateUser(req, res) {
     .finally(() => {
       console.log(`Queried in ${Date.now() - start}ms`);
     });
-  console.log("put user");
   res.status(200).json({ user });
 }
 module.exports = { getUser, getUsers, updateUser };
