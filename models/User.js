@@ -71,11 +71,7 @@ const userSchema = new Schema({
     required: false,
   },
   pfp: {
-    id: {
-      type: String,
-      required: false,
-    },
-    type: {
+    value: {
       type: String,
       required: false,
     },
@@ -85,12 +81,12 @@ const userSchema = new Schema({
     },
   },
   customUsername: {
-    type: String,
-    required: false,
+    value: { type: String, required: false },
+    date: { type: Number, required: false },
   },
   city: {
-    type: String,
-    required: false,
+    value: { type: String, required: false },
+    date: { type: Number, required: false },
   },
   // Points
   gamePoints: {
