@@ -89,9 +89,15 @@ const userSchema = new Schema({
     date: { type: Number, required: false },
   },
   // Points
-  gamePoints: {
+  gameScores: {
     type: Array,
     default: [0],
+    required: false,
+  },
+  // Discord Roles
+  discordRoles: {
+    type: Array,
+    default: ["Member"],
     required: false,
   },
 });
