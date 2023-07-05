@@ -12,8 +12,11 @@ async function getUser(req, res) {
   // Try to get the user from cache
   let user = cache.get(id);
   if (!user) {
-    const fields =
-      "pfp customUsername city gameScores discordRoles discordId username globalName avatar role pfp customUsername";
+    let fields =
+      "city gameScores discordRoles discordId username globalName avatar role pfp customUsername";
+    if (req.query.opt || req.query.opt === "true") {
+      fields += "pfp customUsername";
+    }
     const resp = await User.findOne({ discordId: id }, fields).catch((e) => {
       console.error(e);
       res.status(500).json({ error: "Server Error! :/" });
