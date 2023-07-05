@@ -1,16 +1,13 @@
 function setDefaultCookie(res, name, val) {
-  const sameSite = process.env.IS_TESTING_ENV === "true" ? "strict" : "strict";
   const domain =
     process.env.IS_TESTING_ENV === "true" ? ".localhost" : ".eclecticqbit.art";
-  const maxAge = 2 * 1000 * 60 * 60;
-  const httpOnly = false;
+  const maxAge = 1 * 1000 * 60 * 60;
   const secure = process.env.IS_TESTING_ENV === "true" ? false : true;
   res.cookie(name, val, {
     maxAge: maxAge,
-    httpOnly: httpOnly,
     secure: secure,
     domain: domain,
-    sameSite: sameSite,
+    sameSite: "strict",
   });
   console.log("Setted cookie");
 }

@@ -90,8 +90,8 @@ const userSchema = new Schema({
   },
   // Points
   gamePoints: {
-    type: Number,
-    default: 0,
+    type: Array,
+    default: [0],
     required: false,
   },
 });

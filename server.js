@@ -6,6 +6,7 @@ const connectDb = require("./configs/connectDb");
 const cookieParser = require("cookie-parser");
 const { verifyToken } = require("./middlewares/token");
 const { corsOptions } = require("./configs/corsOptions");
+
 // middlewares
 const app = express();
 app.use(express.json());

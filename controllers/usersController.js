@@ -1,5 +1,6 @@
 const { getDataFromToken } = require("../commonFunctions/commonUser");
 const User = require("../models/User");
+const cache = require("memory-cache");
 
 async function getUser(req, res) {
   const start = Date.now();
@@ -8,16 +9,49 @@ async function getUser(req, res) {
     res.status(403).json({ message: "You can't request other users data! :/" });
     return;
   }
-  const user = await User.find({ discordId: id })
-    .catch((e) => {
+  // Try to get the user from cache
+  let user = cache.get(id);
+  if (!user) {
+    const fields =
+      "pfp customUsername city gamePoints discordId username globalName avatar role pfp customUsername";
+    const resp = await User.findOne({ discordId: id }, fields).catch((e) => {
       console.error(e);
       res.status(500).json({ error: "Server Error! :/" });
       return;
-    })
-    .finally(() => {
-      console.log(`Queried in ${Date.now() - start}ms`);
     });
-  console.log("get user");
+    const customUsername =
+      resp.customUsername && resp.customUsername.value !== "null"
+        ? resp.customUsername.value
+        : null;
+    const pfp = resp.pfp && resp.pfp.value != -1 ? resp.pfp.value : null;
+    user = {
+      discordId: resp.discordId,
+      username: customUsername
+        ? customUsername
+        : resp.globalName
+        ? resp.globalName
+        : username,
+      avatar: pfp >= 0 ? pfp : resp.avatar,
+      role: resp.role,
+      city: resp.city && resp.city.value ? resp.city.value : "",
+      gamePoints: resp.gamePoints,
+    };
+    if (req.query.opt || req.query.opt === "true") {
+      user.opt = {
+        pfp: resp.pfp && resp.pfp.value ? resp.pfp : null,
+        customUsername:
+          resp.customUsername && resp.customUsername.value
+            ? resp.customUsername
+            : null,
+        city: resp.city && resp.city.value ? resp.city : null,
+      };
+    }
+    // Save the queried data for 1 hour, or until the user updates his data
+    cache.put(id, user, 60 * 60 * 1000);
+  } else {
+    console.log("User was found in cache! Yey");
+  }
+  console.log(`Got user in  ${Date.now() - start}ms`);
   res.status(200).json({ user });
 }
 async function getUsers(req, res) {
@@ -64,7 +98,6 @@ async function updateUser(req, res) {
     };
     parsedObj.city.value = body.city;
   }
-  console.log(parsedObj);
   const user = await User.findOneAndUpdate({ discordId: id }, parsedObj)
     .catch((e) => {
       console.error(e);
@@ -74,6 +107,7 @@ async function updateUser(req, res) {
     .finally(() => {
       console.log(`Queried in ${Date.now() - start}ms`);
     });
+  cache.del(id);
   res.status(200).json({ user });
 }
 module.exports = { getUser, getUsers, updateUser };
