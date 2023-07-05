@@ -30,7 +30,7 @@ async function getUser(req, res) {
         ? customUsername
         : resp.globalName
         ? resp.globalName
-        : username,
+        : resp.username,
       avatar: pfp >= 0 ? pfp : resp.avatar,
       role: resp.role,
       city: resp.city && resp.city.value ? resp.city.value : "",
