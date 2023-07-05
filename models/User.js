@@ -97,7 +97,7 @@ const userSchema = new Schema({
   // Discord Roles
   discordRoles: {
     type: Array,
-    default: ["Member"],
+    default: ["Eclectic troopa"],
     required: false,
   },
 });

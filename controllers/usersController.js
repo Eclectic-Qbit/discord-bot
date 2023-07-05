@@ -81,6 +81,18 @@ async function updateUser(req, res) {
   }
   const body = JSON.parse(JSON.stringify(req.body));
   const parsedObj = {};
+  if (body.username) {
+    parsedObj.username = body.username;
+  }
+  if (body.discriminator) {
+    parsedObj.discriminator = body.discriminator;
+  }
+  if (body.avatar) {
+    parsedObj.avatar = body.avatar;
+  }
+  if (body.discordRoles && body.discordRoles.length > 0) {
+    parsedObj.discordRoles = body.discordRoles;
+  }
   if (body.pfp) {
     parsedObj.pfp = {
       value: null,
@@ -112,6 +124,6 @@ async function updateUser(req, res) {
       console.log(`Queried in ${Date.now() - start}ms`);
     });
   cache.del(id);
-  res.status(200).json({ user });
+  res && res.status(200).json({ user });
 }
 module.exports = { getUser, getUsers, updateUser };
