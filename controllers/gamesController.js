@@ -4,6 +4,7 @@ const { getUser, updateUser, getUsers } = require("./usersController");
 const { maxGamePoints, memoryGame } = require("../configs/gamesOptions");
 const GameScore = require("../models/GameScore");
 const { gameCache, userCache } = require("../cache/cache");
+const crypto = require("crypto");
 
 function translateId(id) {
   const users = userCache.get("users");
@@ -76,7 +77,9 @@ async function submitGame(req, res) {
           currentGamePoints = el.amount;
         }
       });
+    console.log("USER INFO", user, currentGamePoints);
     if (maxGamePoints <= fromGames) {
+      console.log("Max points");
       res.status(200).json({ message: "Game points reached" });
       return;
     }
@@ -94,6 +97,7 @@ async function submitGame(req, res) {
       specific: gameType,
       amount: totalPoints,
     });
+    console.log("NEW ARR", newArr);
     // Update in parallel
     const userProm = updateUser({
       params: {
