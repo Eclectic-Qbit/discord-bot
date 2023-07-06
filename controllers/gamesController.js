@@ -1,5 +1,4 @@
 const cache = require("memory-cache");
-const crypto = require("crypto");
 const { getDataFromToken } = require("../commonFunctions/commonUser");
 const { getUser, updateUser, getUsers } = require("./usersController");
 const { maxGamePoints, memoryGame } = require("../configs/gamesOptions");
