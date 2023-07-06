@@ -1,4 +1,3 @@
-// imports
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -8,31 +7,34 @@ const { verifyToken } = require("./middlewares/token");
 const { corsOptions } = require("./configs/corsOptions");
 const discordBot = require("./discord/discord");
 const { connectDiscord } = require("./configs/connectDiscord");
+const { getUsers } = require("./controllers/usersController");
 
-// middlewares
+// Middlewares
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 
-// db connection
+// Db connection
 connectDb();
-// login with discord
+// Login with discord
 connectDiscord(discordBot);
+// Set users in cache
+getUsers();
 
-// routes
+// Routes
 const pre = process.env.IS_TESTING_ENV === "true" ? "" : "/api";
-// => unprotected
+// => Unprotected
 app.use(`${pre}/ping`, (req, res) => {
   console.log("Some1 pinged!");
   res.status(200).json({ message: "Pong!" });
 });
 app.use(`${pre}/login`, require("./routes/login"));
+app.use(`${pre}/games`, require("./routes/api/games"));
+// => Protected
 app.use(verifyToken);
 app.use(`${pre}/users`, require("./routes/api/users"));
-// => protected
-// ...
-// start express
+// Start express
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log("Server started & listening on port ", PORT);

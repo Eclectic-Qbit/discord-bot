@@ -37,13 +37,24 @@ async function syncUsers(client) {
     const start = Date.now();
     const guild = client.guilds.cache.get(process.env.DISCORD_SERVER_ID);
     const members = await guild.members.fetch();
+    const deltaMembers = Date.now() - start;
+    console.log(`Got member list in ${deltaMembers}ms`);
+    console.log("");
+    let total = 0;
     await members.reduce(async (prev, el) => {
       await prev;
       if (!el.user.bot) {
+        total++;
         await syncUser(el);
       }
     }, Promise.resolve());
-    console.log(`Retrieved discord members in ${Date.now() - start}ms`);
+    const delta = Date.now() - start - deltaMembers;
+    console.log("");
+    console.log(
+      `Retrieved discord members (${total}) in ${delta}ms. Avg: ${Math.round(
+        delta / total
+      )}ms/user`
+    );
     console.log("- - - - -");
   } catch (e) {
     console.error("Could not sync ALL users", e);

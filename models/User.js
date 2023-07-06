@@ -89,9 +89,19 @@ const userSchema = new Schema({
     date: { type: Number, required: false },
   },
   // Points
-  gameScores: {
-    type: Array,
-    default: [0],
+  points: [
+    {
+      type: {
+        type: String,
+      }, // Game / Easter-Egg / Other...
+      specific: String, // Memory / Pacman / ...
+      amount: Number, // n
+    },
+  ],
+  // Exp
+  exp: {
+    type: Number,
+    default: 0,
     required: false,
   },
   // Discord Roles

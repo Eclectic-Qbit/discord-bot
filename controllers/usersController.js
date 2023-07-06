@@ -1,45 +1,60 @@
-const { getDataFromToken } = require("../commonFunctions/commonUser");
+const { userCache } = require("../cache/cache");
 const User = require("../models/User");
-const cache = require("memory-cache");
 
+function getFinalData(resp) {
+  const customUsername =
+    resp.customUsername && resp.customUsername.value !== "null"
+      ? resp.customUsername.value
+      : null;
+  const pfp = resp.pfp && resp.pfp.value != -1 ? resp.pfp.value : null;
+  let points = 0;
+  resp.points &&
+    resp.points.map((el) => {
+      points += el.amount;
+    });
+  return {
+    discordId: resp.discordId,
+    username: customUsername
+      ? customUsername
+      : resp.globalName
+      ? resp.globalName
+      : resp.username,
+    avatar: pfp >= 0 ? pfp : resp.avatar,
+    role: resp.role,
+    city: resp.city && resp.city.value ? resp.city.value : "",
+    gameScores: resp.gameScores,
+    discordRoles: resp.discordRoles,
+    points: points,
+  };
+}
 async function getUser(req, res) {
   const start = Date.now();
   const id = req.params.user;
   if (req.userInfo.id !== id) {
-    res.status(403).json({ message: "You can't request other users data! :/" });
-    return;
+    res &&
+      res
+        .status(403)
+        .json({ message: "You can't request other users data! :/" });
+    return null;
   }
   // Try to get the user from cache
-  let user = cache.get(id);
+  let user = userCache.get(id);
   if (!user) {
     let fields =
-      "city gameScores discordRoles discordId username globalName avatar role pfp customUsername";
+      "city points exp discordRoles discordId username globalName avatar role pfp customUsername";
     if (req.query.opt || req.query.opt === "true") {
       fields += "pfp customUsername";
     }
     const resp = await User.findOne({ discordId: id }, fields).catch((e) => {
       console.error(e);
       res.status(500).json({ error: "Server Error! :/" });
-      return;
+      return null;
     });
-    const customUsername =
-      resp.customUsername && resp.customUsername.value !== "null"
-        ? resp.customUsername.value
-        : null;
-    const pfp = resp.pfp && resp.pfp.value != -1 ? resp.pfp.value : null;
-    user = {
-      discordId: resp.discordId,
-      username: customUsername
-        ? customUsername
-        : resp.globalName
-        ? resp.globalName
-        : resp.username,
-      avatar: pfp >= 0 ? pfp : resp.avatar,
-      role: resp.role,
-      city: resp.city && resp.city.value ? resp.city.value : "",
-      gameScores: resp.gameScores,
-      discordRoles: resp.discordRoles,
-    };
+    if (!resp) {
+      res && res.status(404).json({ message: "User not found" });
+      return null;
+    }
+    user = getFinalData(resp);
     if (req.query.opt || req.query.opt === "true") {
       user.opt = {
         pfp: resp.pfp && resp.pfp.value ? resp.pfp : null,
@@ -48,29 +63,38 @@ async function getUser(req, res) {
             ? resp.customUsername
             : null,
         city: resp.city && resp.city.value ? resp.city : null,
+        points: resp.points,
       };
     }
     // Save the queried data for 1 hour, or until the user updates his data
-    cache.put(id, user, 60 * 60 * 1000);
+    userCache.put(id, user, 60 * 60 * 1000);
   } else {
     console.log("User was found in cache! Yey");
   }
   console.log(`Got user in  ${Date.now() - start}ms`);
-  res.status(200).json({ user });
+  res && res.status(200).json({ user });
+  return user;
 }
 async function getUsers(req, res) {
   const start = Date.now();
-  const users = await User.find({})
-    .catch((e) => {
-      console.error(e);
-      res.status(500).json({ error: "Server Error! :/" });
-      return;
-    })
-    .finally(() => {
-      console.log(`Queried in ${Date.now() - start}ms`);
-    });
-  console.log("get users");
-  res.status(200).json({ users });
+  const users = await User.find({}).catch((e) => {
+    console.error(e);
+    res && res.status(500).json({ error: "Server Error! :/" });
+    return null;
+  });
+  if (!users) {
+    res && res.status(404).json({ message: "User not found" });
+    return null;
+  }
+  const finalUsers = [];
+  users.map((el) => {
+    finalUsers.push(getFinalData(el));
+  });
+  // Save the queried data for 1 hour, or until the user updates his data
+  userCache.put("users", finalUsers);
+  console.log(`Got all users in  ${Date.now() - start}ms`);
+  res && res.status(200).json({ finalUsers });
+  return finalUsers;
 }
 async function updateUser(req, res) {
   const start = Date.now();
@@ -89,6 +113,9 @@ async function updateUser(req, res) {
   }
   if (body.avatar) {
     parsedObj.avatar = body.avatar;
+  }
+  if (body.points) {
+    parsedObj.points = body.points;
   }
   if (body.discordRoles && body.discordRoles.length > 0) {
     parsedObj.discordRoles = body.discordRoles;
@@ -114,16 +141,16 @@ async function updateUser(req, res) {
     };
     parsedObj.city.value = body.city;
   }
-  const user = await User.findOneAndUpdate({ discordId: id }, parsedObj)
-    .catch((e) => {
+  const user = await User.findOneAndUpdate({ discordId: id }, parsedObj).catch(
+    (e) => {
       console.error(e);
-      res.status(500).json({ error: "Server Error! :/" });
-      return;
-    })
-    .finally(() => {
-      console.log(`Queried in ${Date.now() - start}ms`);
-    });
-  cache.del(id);
+      res && res.status(500).json({ error: "Server Error! :/" });
+      return null;
+    }
+  );
+  userCache.del(id);
+  console.log(`Updated user in ${Date.now() - start}ms`);
   res && res.status(200).json({ user });
+  return user;
 }
 module.exports = { getUser, getUsers, updateUser };

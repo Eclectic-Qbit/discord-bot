@@ -14,7 +14,6 @@ async function handleCallback(req, res) {
     return;
   }
   const start = Date.now();
-
   const userResponse = await getDiscordData(code);
   if (!userResponse) {
     res.status(500).json({ message: "Server Error!" });
@@ -48,14 +47,15 @@ async function handleCallback(req, res) {
     });
     await user.save();
   }
-  // save that the user logged
-  const userLog = new UserLog({
-    discordId: userResponse.id,
-    date: Date.now(),
-  });
-  await userLog.save();
+  // save that the user logged, if it's not testing env
+  if (process.env.IS_TESTING_ENV !== "true") {
+    const userLog = new UserLog({
+      discordId: userResponse.id,
+      date: Date.now(),
+    });
+    await userLog.save();
+  }
   // save jwt
-  console.log(find.pfp);
   const tokenObj = {
     id: userResponse.id,
     username: userResponse.username,
@@ -67,13 +67,13 @@ async function handleCallback(req, res) {
   };
   const token = signToken(tokenObj);
   setDefaultCookie(res, "token", token);
+  console.log(`User updated&logged in ${Date.now() - start}ms`);
   // answer
   res.redirect(
     process.env.IS_TESTING_ENV === "true"
       ? process.env.CLIENT_REDIRECT_TESTING_URL
       : process.env.CLIENT_REDIRECT_PROD_URL
   );
-  console.log(`Content response in ${Date.now() - start}ms`);
 }
 
 module.exports = { handleCallback };

@@ -10,7 +10,6 @@ const userLogSchema = new Schema({
     type: Number,
     required: true,
   },
-  refreshToken: String,
 });
 
 module.exports = mongoose.model("UserLog", userLogSchema);
