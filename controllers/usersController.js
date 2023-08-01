@@ -24,24 +24,30 @@ async function getRules(resp) {
       data: null,
     },
     {
-      state: second ? "done" : "",
-      data: second,
+      state: !second
+        ? null
+        : second[0].approved
+        ? "done"
+        : second[0].rejected
+        ? "rejected"
+        : "waiting",
+      data: null,
     },
     {
       state: third ? "done" : "",
-      data: third,
+      data: null,
     },
     {
       state: forth ? "done" : "",
-      data: forth,
+      data: null,
     },
     {
       state: fifth ? "done" : "",
-      data: fifth,
+      data: null,
     },
     {
       state: sixth ? "done" : "",
-      data: sixth,
+      data: null,
     },
   ];
   return tasks;
@@ -100,7 +106,8 @@ async function getUser(req, res) {
       res && res.status(404).json({ message: "User not found" });
       return null;
     }
-    user = getFinalData(resp);
+    user = await getFinalData(resp);
+
     user.opt = {
       pfp: resp.pfp && resp.pfp.value ? resp.pfp : null,
       customUsername:
@@ -117,7 +124,6 @@ async function getUser(req, res) {
   }
   console.log(`Got user in  ${Date.now() - start}ms`);
   res && res.status(200).json({ user });
-  console.log(user);
   return user;
 }
 async function getUsers(req, res) {

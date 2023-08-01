@@ -23,6 +23,14 @@ const firstFormSchema = new Schema({
   reasons: {
     type: String,
   },
+  approved: {
+    type: Boolean,
+    default: false,
+  },
+  rejected: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("FirstForm", firstFormSchema);

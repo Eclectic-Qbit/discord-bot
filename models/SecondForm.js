@@ -23,6 +23,14 @@ const secondFormSchema = new Schema({
   live: {
     type: Boolean,
   },
+  approved: {
+    type: Boolean,
+    default: false,
+  },
+  rejected: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("SecondForm", secondFormSchema);
