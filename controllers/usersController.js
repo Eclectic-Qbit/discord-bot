@@ -1,19 +1,53 @@
 const { userCache, discordCache } = require("../cache/cache");
 const User = require("../models/User");
+const { getUserFirstForms, getUserSecondForms } = require("./formsController");
 
-function getRules(resp) {
+async function getRules(resp) {
   const user = resp.globalName ? resp.globalName : resp.username;
   const members = discordCache.get("members");
   const first = members && members.includes(user);
+  const second = await getUserFirstForms({
+    params: { userId: resp.discordId },
+  });
+  const third = second && resp.walletAddress;
+  const forth =
+    second &&
+    third &&
+    (await getUserSecondForms({
+      params: { userId: resp.discordId },
+    }));
+  const fifth = false; // Still to think
+  const sixth = false; // Still to think
   const tasks = [
     {
       state: first ? "done" : "",
+      data: null,
+    },
+    {
+      state: second ? "done" : "",
+      data: second,
+    },
+    {
+      state: third ? "done" : "",
+      data: third,
+    },
+    {
+      state: forth ? "done" : "",
+      data: forth,
+    },
+    {
+      state: fifth ? "done" : "",
+      data: fifth,
+    },
+    {
+      state: sixth ? "done" : "",
+      data: sixth,
     },
   ];
   return tasks;
 }
 
-function getFinalData(resp) {
+async function getFinalData(resp) {
   const customUsername =
     resp.customUsername && resp.customUsername.value !== "null"
       ? resp.customUsername.value
@@ -36,7 +70,7 @@ function getFinalData(resp) {
     city: resp.city && resp.city.value ? resp.city.value : "",
     discordRoles: resp.discordRoles,
     points: points,
-    paintEarnRules: getRules(resp),
+    paintEarnRules: await getRules(resp),
   };
 }
 async function getUser(req, res) {
