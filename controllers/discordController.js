@@ -1,3 +1,4 @@
+const { discordCache } = require("../cache/cache");
 const { allowedRoles } = require("../configs/allowedRoles");
 const { updateUser } = require("./usersController");
 
@@ -41,13 +42,16 @@ async function syncUsers(client) {
     console.log(`Got member list in ${deltaMembers}ms`);
     console.log("");
     let total = 0;
+    const cachedMembers = [];
     await members.reduce(async (prev, el) => {
       await prev;
       if (!el.user.bot) {
         total++;
         await syncUser(el);
+        cachedMembers.push(el.user.username);
       }
     }, Promise.resolve());
+    discordCache.put("members", cachedMembers);
     const delta = Date.now() - start - deltaMembers;
     console.log("");
     console.log(

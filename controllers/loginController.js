@@ -1,8 +1,5 @@
-const axios = require("axios");
 const User = require("../models/User");
 const UserLog = require("../models/UserLog");
-const { sign } = require("jsonwebtoken");
-const { corsOptions } = require("../configs/corsOptions");
 const { getDiscordData } = require("../commonFunctions/commonDiscord");
 const { signToken } = require("../commonFunctions/commonToken");
 const { setDefaultCookie } = require("../commonFunctions/commonCookie");

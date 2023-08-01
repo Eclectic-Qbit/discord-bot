@@ -60,7 +60,6 @@ const userSchema = new Schema({
     default: 0,
     required: false,
   },
-
   // Website info
   refreshToken: {
     type: String,

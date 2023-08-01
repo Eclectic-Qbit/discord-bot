@@ -1,5 +1,20 @@
-const { userCache } = require("../cache/cache");
+const { userCache, discordCache } = require("../cache/cache");
 const User = require("../models/User");
+
+function getRules(resp) {
+  const user = resp.globalName ? resp.globalName : resp.username;
+  const members = discordCache.get("members");
+  const first = members && members.includes(user);
+  console.log(members);
+  console.log("FIrst task:", first, resp.globalName, resp.username);
+  const tasks = [
+    {
+      state: first ? "done" : "",
+    },
+  ];
+  console.log(tasks);
+  return tasks;
+}
 
 function getFinalData(resp) {
   const customUsername =
@@ -22,9 +37,9 @@ function getFinalData(resp) {
     avatar: pfp >= 0 ? pfp : resp.avatar,
     role: resp.role,
     city: resp.city && resp.city.value ? resp.city.value : "",
-    gameScores: resp.gameScores,
     discordRoles: resp.discordRoles,
     points: points,
+    paintEarnRules: getRules(resp),
   };
 }
 async function getUser(req, res) {
@@ -55,17 +70,15 @@ async function getUser(req, res) {
       return null;
     }
     user = getFinalData(resp);
-    if (req.query.opt || req.query.opt === "true") {
-      user.opt = {
-        pfp: resp.pfp && resp.pfp.value ? resp.pfp : null,
-        customUsername:
-          resp.customUsername && resp.customUsername.value
-            ? resp.customUsername
-            : null,
-        city: resp.city && resp.city.value ? resp.city : null,
-        points: resp.points,
-      };
-    }
+    user.opt = {
+      pfp: resp.pfp && resp.pfp.value ? resp.pfp : null,
+      customUsername:
+        resp.customUsername && resp.customUsername.value
+          ? resp.customUsername
+          : null,
+      city: resp.city && resp.city.value ? resp.city : null,
+      points: resp.points,
+    };
     // Save the queried data for 1 hour, or until the user updates his data
     userCache.put(id, user, 60 * 60 * 1000);
   } else {
@@ -73,6 +86,7 @@ async function getUser(req, res) {
   }
   console.log(`Got user in  ${Date.now() - start}ms`);
   res && res.status(200).json({ user });
+  console.log(user);
   return user;
 }
 async function getUsers(req, res) {

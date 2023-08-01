@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits } = require("discord.js");
 const { syncUser, syncUsers } = require("../controllers/discordController");
+const { getUsers } = require("../controllers/usersController");
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds, // Required for guild-related events
@@ -9,7 +10,9 @@ const client = new Client({
 
 // This code will only provide sync for user - roles at the time I'm writing
 client.on("ready", () => {
-  syncUsers(client);
+  syncUsers(client).then(() => {
+    getUsers(); // Once discord cache is up-to-date, cache the users
+  });
 });
 client.on("guildMemberUpdate", (oldM, newM) => {
   const oldRoles = oldM.roles.cache.map((el) => el.name);

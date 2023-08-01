@@ -19,8 +19,6 @@ app.use(cors(corsOptions));
 connectDb();
 // Login with discord
 connectDiscord(discordBot);
-// Set users in cache
-getUsers();
 
 // Routes
 const pre = process.env.IS_TESTING_ENV === "true" ? "" : "/api";
@@ -31,6 +29,7 @@ app.use(`${pre}/ping`, (req, res) => {
 });
 app.use(`${pre}/login`, require("./routes/login"));
 app.use(`${pre}/games`, require("./routes/api/games"));
+app.use(`${pre}/forms`, require("./routes/api/forms"));
 // => Protected
 app.use(verifyToken);
 app.use(`${pre}/users`, require("./routes/api/users"));
