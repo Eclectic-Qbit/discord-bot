@@ -46,8 +46,8 @@ async function insertFirstForm(req, res) {
     country: country,
     reasons: reasons,
   });
-  await newForm.save();
-  console.log("FOR", newForm);
+  const save = await newForm.save();
+  console.log("FOR", save);
   return res.sendStatus(200);
 }
 module.exports = { insertFirstForm };
