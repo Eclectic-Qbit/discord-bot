@@ -5,14 +5,11 @@ function getRules(resp) {
   const user = resp.globalName ? resp.globalName : resp.username;
   const members = discordCache.get("members");
   const first = members && members.includes(user);
-  console.log(members);
-  console.log("FIrst task:", first, resp.globalName, resp.username);
   const tasks = [
     {
       state: first ? "done" : "",
     },
   ];
-  console.log(tasks);
   return tasks;
 }
 
