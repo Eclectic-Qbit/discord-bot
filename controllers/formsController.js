@@ -46,6 +46,7 @@ async function insertFirstForm(req, res) {
     country: country,
     reasons: reasons,
   });
+  await newForm.save();
   console.log("FOR", newForm);
   return res.sendStatus(200);
 }
