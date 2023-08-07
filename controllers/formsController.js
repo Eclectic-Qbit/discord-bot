@@ -27,7 +27,7 @@ async function insertFirstForm(req, res) {
   const result = await User.findOne(
     {
       $or: [
-        { customUsername: username },
+        { customUsername: { value: username } },
         { globalName: username },
         { username: username },
       ],
@@ -60,7 +60,7 @@ async function insertSecondForm(req, res) {
     return res.sendStatus(400);
   }
   console.log(body.formId);
-  if (body.formId !== "1uAKl_MpdF0imY6UEbq-CgwcAocoLC8pX0Q2d4QgOiYc") {
+  if (body.formId !== "1oxgVQ-5e43RR9-454C5Imj0Fui5wfUn0FmRoeOqFR_o") {
     console.log(403);
     return res.sendStatus(403);
   }

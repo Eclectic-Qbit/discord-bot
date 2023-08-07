@@ -7,10 +7,11 @@ const { gameCache, userCache } = require("../cache/cache");
 const crypto = require("crypto");
 
 function translateId(id) {
-  const users = userCache.get("users");
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].discordId === id) {
-      return users[i].username;
+  const keys = Object.keys(JSON.parse(userCache.exportJson()));
+  for (let i = 0; i < keys.length; i++) {
+    const user = userCache.get(keys[i]);
+    if (user.discordId === id) {
+      return user.username;
     }
   }
 }

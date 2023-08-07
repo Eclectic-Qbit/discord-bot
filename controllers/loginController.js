@@ -52,6 +52,7 @@ async function handleCallback(req, res) {
     });
     await userLog.save();
   }
+  console.log(userResponse, find);
   // save jwt
   const tokenObj = {
     id: userResponse.id,

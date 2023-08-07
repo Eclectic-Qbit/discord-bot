@@ -3,7 +3,6 @@ const { signToken } = require("../commonFunctions/commonToken");
 const { setDefaultCookie } = require("../commonFunctions/commonCookie");
 
 async function verifyToken(req, res, next) {
-  console.log(req.cookies);
   const cookie =
     req.cookies.token || req.headers.Authorization || req.headers.authorization;
   if (!cookie) {

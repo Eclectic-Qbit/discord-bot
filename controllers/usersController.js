@@ -53,12 +53,12 @@ async function getRules(resp) {
   return tasks;
 }
 
-async function getFinalData(resp) {
+async function getFullData(resp) {
   const customUsername =
     resp.customUsername && resp.customUsername.value !== "null"
       ? resp.customUsername.value
       : null;
-  const pfp = resp.pfp && resp.pfp.value != -1 ? resp.pfp.value : null;
+  const pfp = resp.pfp && resp.pfp.value >= 0 ? resp.pfp.value : null;
   let points = 0;
   resp.points &&
     resp.points.map((el) => {
@@ -66,19 +66,35 @@ async function getFinalData(resp) {
     });
   return {
     discordId: resp.discordId,
-    username: customUsername
-      ? customUsername
-      : resp.globalName
-      ? resp.globalName
-      : resp.username,
-    avatar: pfp >= 0 ? pfp : resp.avatar,
+    username: customUsername,
+    discordUsername: resp.globalName ? resp.globalName : resp.username,
+    avatar: resp.avatar,
+    pfp: pfp,
     role: resp.role,
-    city: resp.city && resp.city.value ? resp.city.value : "",
+    city: resp.city && resp.city.value ? resp.city.value : null,
     discordRoles: resp.discordRoles,
     points: points,
     paintEarnRules: await getRules(resp),
+    opt: {
+      pfp: resp.pfp && resp.pfp.value ? resp.pfp : null,
+      points: resp.points,
+    },
   };
 }
+
+function getFilteredData(data, filters) {
+  if (!filters || filters.length === 0) {
+    return data;
+  }
+  const finalObj = {};
+  Object.keys(data).map((key) => {
+    if (filters.includes(key)) {
+      finalObj[key] = data[key];
+    }
+  });
+  return finalObj;
+}
+
 async function getUser(req, res) {
   const start = Date.now();
   const id = req.params.user;
@@ -92,12 +108,7 @@ async function getUser(req, res) {
   // Try to get the user from cache
   let user = userCache.get(id);
   if (!user) {
-    let fields =
-      "city points exp discordRoles discordId username globalName avatar role pfp customUsername";
-    if (req.query.opt || req.query.opt === "true") {
-      fields += "pfp customUsername";
-    }
-    const resp = await User.findOne({ discordId: id }, fields).catch((e) => {
+    const resp = await User.findOne({ discordId: id }).catch((e) => {
       console.error(e);
       res.status(500).json({ error: "Server Error! :/" });
       return null;
@@ -106,25 +117,18 @@ async function getUser(req, res) {
       res && res.status(404).json({ message: "User not found" });
       return null;
     }
-    user = await getFinalData(resp);
-
-    user.opt = {
-      pfp: resp.pfp && resp.pfp.value ? resp.pfp : null,
-      customUsername:
-        resp.customUsername && resp.customUsername.value
-          ? resp.customUsername
-          : null,
-      city: resp.city && resp.city.value ? resp.city : null,
-      points: resp.points,
-    };
+    user = await getFullData(resp);
     // Save the queried data for 1 hour, or until the user updates his data
     userCache.put(id, user, 60 * 60 * 1000);
   } else {
     console.log("User was found in cache! Yey");
   }
   console.log(`Got user in  ${Date.now() - start}ms`);
-  res && res.status(200).json({ user });
-  return user;
+  // Check the filters => Need to be applied only after the value is cached
+  const filters = req && req.query && req.query.filters;
+  const filteredData = getFilteredData(user, filters);
+  res && res.status(200).json(filteredData);
+  return filteredData;
 }
 async function getUsers(req, res) {
   const start = Date.now();
@@ -138,13 +142,16 @@ async function getUsers(req, res) {
     return null;
   }
   const finalUsers = [];
-  users.map((el) => {
-    finalUsers.push(getFinalData(el));
+  const filters = req && req.query && req.query.filters;
+  users.map(async (el) => {
+    const fullUser = await getFullData(el);
+    userCache.put(fullUser.discordId, fullUser);
+    finalUsers.push(getFilteredData(fullUser, filters));
+    //console.log(fullUser, " \n--\n", getFilteredData(fullUser, filters));
+    //console.log("\n\n-------------\n\n");
   });
-  // Save the queried data for 1 hour, or until the user updates his data
-  userCache.put("users", finalUsers);
   console.log(`Got all users in  ${Date.now() - start}ms`);
-  res && res.status(200).json({ finalUsers });
+  res && res.status(200).json(finalUsers);
   return finalUsers;
 }
 async function updateUser(req, res) {
